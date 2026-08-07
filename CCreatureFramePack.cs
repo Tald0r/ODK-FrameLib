@@ -98,7 +98,10 @@ namespace FrameLib
         /// <param name="filedir">The directory of the .cfpk.</param>
         public CCreatureFramePack(string filedir)
         {
-            FileStream file = File.Open(filedir, FileMode.Open);
+            using (FileStream file = File.Open(filedir, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                Load(ref file);
+            }
 
             if (file.Length == 0) return;
 

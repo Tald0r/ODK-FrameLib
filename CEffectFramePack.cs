@@ -56,7 +56,7 @@ namespace FrameLib
 
                 ef.Directions = new List<Direction>();
 
-                for (int d = 0; d < directioncount; d++)
+                for (int d = 0; d < directioncount; d++) // fixed infinite loop?
                 {
                     Direction di;
 
@@ -80,7 +80,10 @@ namespace FrameLib
         /// <param name="filedir">The directory of the .efpk.</param>
         public CEffectFramePack(string filedir)
         {
-            FileStream file = File.Open(filedir, FileMode.Open);
+            using (FileStream file = File.Open(filedir, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                Load(ref file);
+            }
 
             if (file.Length == 0) return;
 
