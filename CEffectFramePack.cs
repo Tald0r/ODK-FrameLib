@@ -56,7 +56,7 @@ namespace FrameLib
 
                 ef.Directions = new List<Direction>();
 
-                for (int d = 0; d < directioncount; i++)
+                for (int d = 0; d < directioncount; d++)
                 {
                     Direction di;
 
