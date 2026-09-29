@@ -100,55 +100,54 @@ namespace FrameLib
         {
             using (FileStream file = File.Open(filedir, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                Load(ref file);
-            }
+                if (file.Length == 0) return;
 
-            if (file.Length == 0) return;
+                this.Creatures = new List<Creature>();
 
-            this.Creatures = new List<Creature>();
+                byte[] _crc = new byte[2];
+                file.Read(_crc, 0, 2);
+                UInt16 creaturecount = BitConverter.ToUInt16(_crc, 0);
 
-            byte[] _crc = new byte[2];
-            file.Read(_crc, 0, 2);
-            UInt16 creaturecount = BitConverter.ToUInt16(_crc, 0);
-
-            for (int i = 0; i < creaturecount; i++)
-            {
-                Creature cr;
-
-                byte actioncount = (byte)file.ReadByte();
-
-                cr.Actions = new List<Action>();
-
-                for (int a = 0; a < actioncount; a++)
+                for (int i = 0; i < creaturecount; i++)
                 {
-                    Action ac;
+                    Creature cr;
 
-                    byte dircount = (byte)file.ReadByte();
+                    byte actioncount = (byte)file.ReadByte();
 
-                    ac.Directions = new List<Direction>();
+                    cr.Actions = new List<Action>();
 
-                    for (int d = 0; d < dircount; d++ )
+                    for (int a = 0; a < actioncount; a++)
                     {
-                        Direction di;
+                        Action ac;
 
-                        byte[] _frc = new byte[2];
-                        file.Read(_frc, 0, 2);
-                        UInt16 framecount = BitConverter.ToUInt16(_frc, 0);
+                        byte dircount = (byte)file.ReadByte();
 
-                        di.Frames = new CCreatureFrame[framecount];
+                        ac.Directions = new List<Direction>();
 
-                        for (int f = 0; f < framecount; f++)
+                        for (int d = 0; d < dircount; d++ )
                         {
-                            di.Frames[f] = new CCreatureFrame(ref file);
+                            Direction di;
+
+                            byte[] _frc = new byte[2];
+                            file.Read(_frc, 0, 2);
+                            UInt16 framecount = BitConverter.ToUInt16(_frc, 0);
+
+                            di.Frames = new CCreatureFrame[framecount];
+
+                            for (int f = 0; f < framecount; f++)
+                            {
+                                FileStream fileRef = file;
+                                di.Frames[f] = new CCreatureFrame(ref fileRef);
+                            }
+
+                            ac.Directions.Add(di);
                         }
 
-                        ac.Directions.Add(di);
+                        cr.Actions.Add(ac);
                     }
 
-                    cr.Actions.Add(ac);
+                    this.Creatures.Add(cr);
                 }
-
-                this.Creatures.Add(cr);
             }
         }
     }

@@ -43,22 +43,21 @@ namespace FrameLib
         {
             using (FileStream file = File.Open(filedir, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                Load(ref file);
-            }
+                if (file.Length == 0) return;
 
-            if (file.Length == 0) return;
+                this.Frames = new List<CImageFrame>();
 
-            this.Frames = new List<CImageFrame>();
+                byte[] _spc = new byte[2];
+                file.Read(_spc, 0, 2);
+                UInt16 spritecount = BitConverter.ToUInt16(_spc, 0);
 
-            byte[] _spc = new byte[2];
-            file.Read(_spc, 0, 2);
-            UInt16 spritecount = BitConverter.ToUInt16(_spc, 0);
+                for (int i = 0; i < spritecount; i++)
+                {
+                    FileStream fileRef = file;
+                    CImageFrame imgf = new CImageFrame(ref fileRef);
 
-            for (int i = 0; i < spritecount; i++)
-            {
-                CImageFrame imgf = new CImageFrame(ref file);
-
-                this.Frames.Add(imgf);
+                    this.Frames.Add(imgf);
+                }
             }
         }
 

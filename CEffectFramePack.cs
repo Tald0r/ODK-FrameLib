@@ -82,47 +82,43 @@ namespace FrameLib
         {
             using (FileStream file = File.Open(filedir, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                Load(ref file);
-            }
+                if (file.Length == 0) return;
 
-            if (file.Length == 0) return;
+                this.Effects = new List<Effect>();
 
-            this.Effects = new List<Effect>();
+                byte[] _efc = new byte[2];
+                file.Read(_efc, 0, 2);
+                UInt16 effectcount = BitConverter.ToUInt16(_efc, 0);
 
-            byte[] _efc = new byte[2];
-            file.Read(_efc, 0, 2);
-            UInt16 effectcount = BitConverter.ToUInt16(_efc, 0);
-
-            this.Effects = new List<Effect>();
-
-            for (int i = 0; i < effectcount; i++)
-            {
-                Effect ef;
-
-                byte directioncount = (byte)file.ReadByte();
-                //byte framecount = (byte)file.ReadByte();
-
-                ef.Directions = new List<Direction>();
-
-                for (int d = 0; d < directioncount; d++)
+                for (int i = 0; i < effectcount; i++)
                 {
-                    Direction di;
+                    Effect ef;
+
+                    byte directioncount = (byte)file.ReadByte();
 
                     byte[] _frc = new byte[2];
                     file.Read(_frc, 0, 2);
                     UInt16 framecount = BitConverter.ToUInt16(_frc, 0);
 
-                    di.Frames = new CEffectFrame[framecount];//new List<CEffectFrame>();
+                    ef.Directions = new List<Direction>();
 
-                    for (int f = 0; f < framecount; f++)
+                    for (int d = 0; d < directioncount; d++)
                     {
-                        di.Frames[f] = new CEffectFrame(ref file);
+                        Direction di;
+
+                        di.Frames = new CEffectFrame[framecount];
+
+                        for (int f = 0; f < framecount; f++)
+                        {
+                            FileStream fileRef = file;
+                            di.Frames[f] = new CEffectFrame(ref fileRef);
+                        }
+
+                        ef.Directions.Add(di);
                     }
 
-                    ef.Directions.Add(di);
+                    this.Effects.Add(ef);
                 }
-
-                this.Effects.Add(ef);
             }
         }
     }
